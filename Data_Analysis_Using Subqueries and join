@@ -1,0 +1,31 @@
+--Using a subquery, find the names of all the tracks for the album "Californication"
+
+Select Name, AlbumId
+from tracks where AlbumId In (Select AlbumId
+From Albums
+where Title = "Californication")
+
+--Find the total number of invoices for each customer along with the customer's full name, city and email.
+
+select invoiceid, FirstName, LastName, City, Email from customers As C
+inner join invoices As I 
+On C.customerid = I.customerid
+Where FirstName = "František"
+
+--Retrieve the track name, album, artistID, and trackID for all the albums.
+
+select tr.Name, Al.Title, Al.ArtistID, tr.trackId from Albums As Al inner join 
+tracks As Tr On Al.AlbumId = Tr.AlbumId;
+
+--Retrieve a list with the managers last name, and the last name of the employees who report to him or her.
+
+SELECT DISTINCT T1.LastName
+FROM Employees T1, Employees T2
+WHERE T1.Reportsto = 2;
+
+--Find the name and ID of the artists who do not have albums. 
+
+Select Composer, Name from Tracks
+Where AlbumId is null
+
+--
