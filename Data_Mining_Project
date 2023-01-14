@@ -1,0 +1,45 @@
+--Find all the tracks that have a length of 5,000,000 milliseconds or more
+
+SELECT * FROM  tracks
+WHERE  Milliseconds >= "5000000"; 
+
+--Find all the invoices whose total is between $5 and $15 dollars.
+
+SELECT * 
+FROM INVOICES
+wHERE tOTAL between 5 and 15;
+
+--Find all the customers from the following States: RJ, DF, AB, BC, CA, WA, NY.
+
+select * from customers
+where state In ("RJ", "DF",  "AB", "BC", "CA", "WA", "NY")
+
+--Find all the invoices for customer 56 and 58 where the total was between $1.00 and $5.00.
+
+select * from invoices
+where customerid In(56, 58) And (Total between 1.00 and 5.00);
+
+--Find all the tracks whose name starts with 'All'.
+
+select * from
+tracks
+where name like "All%";
+
+-- Find all the customer emails that start with "J" and are from gmail.com
+
+select * from customers
+where email like "j%" And email like"%gmail.com";
+
+-- Find all the invoices from the billing city Brasília, Edmonton, and Vancouver and sort in descending order by invoice ID.
+
+select * from invoices
+where Billingcity In("Brasília", "Edmonton", "Vancouver")
+Order by invoiceid Desc
+
+--Show the number of orders placed by each customer (hint: this is found in the invoices table) and sort the result by the number of orders in descending orde
+
+select Customerid, count(invoiceid) As Total_Order from 
+invoices
+Group by Customerid
+Order by Customerid Desc;
+
