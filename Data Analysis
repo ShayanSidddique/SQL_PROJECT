@@ -1,0 +1,60 @@
+-- Total Student Count
+WITH Total_Student AS (
+  SELECT
+    School_ID,
+    Concat(School_id, Year) As UID,
+    Year,
+    COUNT(DISTINCT CONCAT(School_ID, Personal_code)) AS Total_Student
+  FROM `sturdy-torch-338204.IB_DP_Result.IB_DP_Result`
+  WHERE Result IS NOT NULL
+    AND Grade_Criteria_2 != "N"
+    AND Category = "Diploma"
+  GROUP BY School_ID, Year
+),
+Total_Points AS (
+  SELECT
+    Name,
+    Personal_code,
+    SUM(CASE WHEN Subject = "EeTok Points" THEN Grade ELSE 0 END) AS `EeTokPoints`,
+    SUM(CASE WHEN Subject = "Total Points" THEN Grade ELSE 0 END) AS `TotalPoints`
+  FROM `IB_DP_Result.IB_DP_Result`
+  WHERE Category = "Diploma"
+  GROUP BY Name, Personal_code
+),
+Unique_BInfo AS (
+  SELECT DISTINCT
+    Region,
+    School_Id,
+    Branch_Name,
+    Year,
+    Result,
+    CONCAT(School_id, Year) AS ID,
+    Name,
+    Personal_Code
+  FROM sturdy-torch-338204.IB_DP_Result.IB_DP_Result
+), 
+Final As (
+SELECT Region, UBI.School_id, UBI.Year, UBI.Name, UBI.Personal_code,UBI.Branch_Name, UBI.Result,TS.Total_Student, TP.EeTokPoints, TP.TotalPoints FROM Unique_BInfo UBI
+Left Join Total_Student TS On UBI.ID = TS.UID 
+Left Join Total_Points TP ON UBI.Personal_code = TP.Personal_code
+),
+Query As (
+SELECT *,
+  CASE WHEN Final.TotalPoints >= 40 THEN 1 ELSE 0 END AS `No Of High Achievers`,
+  CASE WHEN Final.Result = "Diploma Awarded" or Final.Result = "Bilingual Diploma Awarded" THEN 1 ELSE 0 END AS `Count of Diploma Awarded`,
+CASE 
+  WHEN Final.TotalPoints >= 40 THEN '40 - 45'
+  WHEN Final.TotalPoints >= 35 THEN '35 - 39'
+  WHEN Final.TotalPoints >= 30 THEN '30 - 34'
+  WHEN Final.TotalPoints >= 25 THEN '25 - 29'
+  WHEN Final.TotalPoints >= 1 THEN '1 - 24'
+  ELSE 'Not in Category'
+END AS Score_Category
+
+FROM Final)
+SELECT * From Query 
+Where School_ID IN
+(
+  SELECT School_ID FROM sturdy-torch-338204.IB_DP_Result.Data_Access
+  WHERE  @DS_USER_EMAIL = Email
+)
