@@ -1,0 +1,50 @@
+WITH LastDayRecoverable AS (
+    SELECT 
+        Region, 
+        `Cluster`, 
+        School_ID, 
+        Class, 
+        COUNT(*) AS Previous_Day_Count, 
+        CONCAT(School_ID, Class) AS UID 
+    FROM 
+        `sturdy-torch-338204.Daily_Reporting.Recoverable_last_day`
+    GROUP BY 
+        Region, 
+        `Cluster`, 
+        School_ID, 
+        Class, 
+        CONCAT(School_ID, Class)
+),
+CurrentRecoverable AS (
+    SELECT 
+        Region, 
+        `Cluster`, 
+        School_ID, 
+        Class, 
+        CONCAT(School_ID, Class) AS UID, 
+        COUNT(*) AS Count_For_Today 
+    FROM 
+        `sturdy-torch-338204.Daily_Reporting.Recoverable`
+    GROUP BY 
+        Region, 
+        `Cluster`, 
+        School_ID, 
+        Class, 
+        CONCAT(School_ID, Class)
+)
+
+SELECT 
+    UB.Region, 
+    UB.Cluster, 
+    UB.School_ID, 
+    UB.Branch_Name, 
+    UB.Class, 
+    R.Count_For_Today, 
+    L.Previous_Day_Count, 
+    (R.Count_For_Today - L.Previous_Day_Count) AS Count_Difference 
+FROM 
+    `sturdy-torch-338204.Daily_Reporting.Unique_Branch` UB
+LEFT JOIN 
+    LastDayRecoverable L ON UB.UID = L.UID
+LEFT JOIN 
+    CurrentRecoverable R ON UB.UID = R.UID;
